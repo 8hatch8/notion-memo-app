@@ -22,12 +22,18 @@
       <ul class="navbar-nav">
         <!-- ノートリストページへのリンク -->
         <li class="nav-item">
-          <a class="nav-link" href="#">ノートリスト</a>
+          <a class="nav-link" href="#">
+            <font-awesome-icon icon="file-alt" />
+            ノートリスト
+          </a>
         </li>
 
         <!-- 学習ページへのリンク -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown">学習用ページ</a>
+          <a class="nav-link dropdown-toggle" data-toggle="dropdown">
+            <font-awesome-icon icon="user-graduate" />
+            学習用ページ
+          </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="#">学習1</a></li>
             <li><a class="dropdown-item" href="#">学習2</a></li>
