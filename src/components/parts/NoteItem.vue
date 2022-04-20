@@ -7,8 +7,23 @@
       @mouseleave="onMouseLeave"
     >
       <!-- eslint-disable-next-line -->
-      <div class="note-icon"><font-awesome-icon class="file-alt"></font-awesome-icon></div>
+      <div class="note-icon"><font-awesome-icon icon="file-alt" /></div>
       <div class="note-name">{{ note.name }}</div>
+      <!-- 操作メニュー -->
+      <div class="buttons">
+        <div class="button-icon">
+          <font-awesome-icon icon="sitemap" />
+        </div>
+        <div class="button-icon">
+          <font-awesome-icon icon="plus-circle" />
+        </div>
+        <div class="button-icon">
+          <font-awesome-icon icon="edit" />
+        </div>
+        <div class="button-icon">
+          <font-awesome-icon icon="trash" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -48,6 +63,15 @@ export default {
   .note-name {
     width: 100%;
     padding: 3px 10px;
+  }
+  .buttons {
+    display: flex;
+    flex-direction: row;
+    .button-icon {
+      padding: 3px;
+      margin-left: 3px;
+      border-radius: 5px;
+    }
   }
 }
 </style>
