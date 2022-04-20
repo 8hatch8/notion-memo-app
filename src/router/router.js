@@ -1,29 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Main from "@/components/MainPage.vue";
-import Binding from "@/components/study/BindingPage.vue";
-import Directive from "@/components/study/DirectivePage.vue";
-import Event from "@/components/study/EventPage.vue";
 
 const routes = [
   {
-    path: "/main",
+    path: "/",
     name: "Main",
     component: Main,
-  },
-  {
-    path: "/study/binding",
-    name: "binding",
-    component: Binding,
-  },
-  {
-    path: "/study/directive",
-    name: "directive",
-    component: Directive,
-  },
-  {
-    path: "/study/event",
-    name: "event",
-    component: Event,
   },
 ];
 
