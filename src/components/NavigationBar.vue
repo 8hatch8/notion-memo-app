@@ -2,7 +2,7 @@
   <!-- ナビゲーションバーをダークテーマで作成 -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <!-- タイトル -->
-    <a class="navbar-brand" href="#">Vue Notion</a>
+    <a class="navbar-brand" href="/">Vue Notion</a>
 
     <!-- 画面サイズに応じて折りたたむ設定  -->
     <button
@@ -22,7 +22,7 @@
       <ul class="navbar-nav">
         <!-- ノートリストページへのリンク -->
         <li class="nav-item">
-          <a class="nav-link" href="#">
+          <a class="nav-link" href="/">
             <font-awesome-icon icon="file-alt" />
             ノートリスト
           </a>
