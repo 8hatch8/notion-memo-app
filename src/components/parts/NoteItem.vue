@@ -20,7 +20,7 @@
         <div class="button-icon">
           <font-awesome-icon icon="edit" />
         </div>
-        <div class="button-icon">
+        <div class="button-icon" @click="onClickDelete(note)">
           <font-awesome-icon icon="trash" />
         </div>
       </div>
@@ -31,6 +31,7 @@
 export default {
   name: "NoteItem",
   props: ["note"],
+  emits: ["delete"],
   data() {
     return {
       mouseOver: false,
@@ -42,6 +43,9 @@ export default {
     },
     onMouseLeave() {
       this.mouseOver = false;
+    },
+    onClickDelete(note) {
+      this.$emit("delete", note);
     },
   },
 };

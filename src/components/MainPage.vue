@@ -2,7 +2,7 @@
   <div class="main-page">
     <div class="left-menu">
       <!-- ノートリスト -->
-      <NoteItem v-for="note in noteList" :note="note" :key="note.id" />
+      <NoteItem v-for="note in noteList" :note="note" :key="note.id" @delete="deleteNote" />
       <!-- ノート追加ボタン -->
       <button class="transparent" @click="addNote">
         <font-awesome-icon icon="plus-square" />ノートを追加
@@ -27,6 +27,10 @@ export default {
         id: new Date().getTime().toString(16),
         name: "新規ノート",
       });
+    },
+    deleteNote(note) {
+      const index = this.noteList.indexOf(note);
+      this.noteList.splice(index, 1);
     },
   },
 };
