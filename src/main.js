@@ -7,5 +7,5 @@ import { fas } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 library.add(fas);
-
+// eslint-disable-next-line
 createApp(App).use(router).component("font-awesome-icon", FontAwesomeIcon).mount("#app");

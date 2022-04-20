@@ -2,10 +2,7 @@
   <div class="main-page">
     <div class="left-menu">
       <!-- ノートリスト -->
-      <div class="note" v-for="note in noteList" :key="note.id">
-        <div class="note-icon"><font-awesome-icon class="file-alt"></font-awesome-icon></div>
-        <div class="note-name">{{ note.name }}</div>
-      </div>
+      <NoteItem v-for="note in noteList" :note="note" :key="note.id" />
       <!-- ノート追加ボタン -->
       <button class="transparent" @click="addNote">
         <font-awesome-icon icon="plus-square" />ノートを追加
@@ -16,7 +13,9 @@
 </template>
 
 <script>
+import NoteItem from "@/components/parts/NoteItem.vue";
 export default {
+  components: { NoteItem },
   data() {
     return {
       noteList: [],
@@ -40,20 +39,6 @@ export default {
   .left-menu {
     width: 350px;
     background-color: #f7f6f3;
-    .note {
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-      padding: 5px;
-      color: rgba(25, 23, 17, 0.6);
-      .note-icon {
-        margin-left: 10px;
-      }
-      .note-name {
-        width: 100%;
-        padding: 3px 10px;
-      }
-    }
   }
   .right-view {
     flex-grow: 1;
