@@ -25,10 +25,10 @@
           <div class="note-name">{{ name }}</div>
           <!-- 操作メニュー -->
           <div class="buttons">
-            <div class="button-icon" @click="onClickAddChild(note)">
+            <div class="button-icon" v-if="shouldShowAddChild" @click="onClickAddChild(note)">
               <font-awesome-icon icon="sitemap" />
             </div>
-            <div class="button-icon">
+            <div class="button-icon" @click="onClickAddBrother(parentNote, note)">
               <font-awesome-icon icon="plus-circle" />
             </div>
             <div class="button-icon" @click="onClickEdit">
@@ -48,9 +48,11 @@
           :note="childNote"
           :parentNote="note"
           :key="childNote.id"
+          :layer="layer + 1"
           @delete="onClickDelete"
           @edit-end="onEditEnd"
           @add-child="onClickAddChild"
+          @add-brother="onClickAddBrother"
         />
       </div>
     </div>
@@ -59,14 +61,20 @@
 <script>
 export default {
   name: "NoteItem",
-  props: ["note", "key", "parentNote"],
-  emits: ["delete", "edit-end", "add-child"],
+  props: ["note", "key", "parentNote", "layer"],
+  emits: ["delete", "edit-end", "add-child", "add-brother"],
   data() {
     return {
-      name: this.note.name, // ToDo:初期値を直接わたしてOKか？確認
+      name: this.note.name,
       mouseOver: false,
       isEditing: false,
     };
+  },
+  computed: {
+    // layerが3未満ならchildNote追加ボタンを表示
+    shouldShowAddChild() {
+      return this.layer < 3 ? true : false;
+    },
   },
   methods: {
     // マウスオーバー
@@ -82,24 +90,26 @@ export default {
     },
     onClickEdit() {
       this.isEditing = true;
-
       this.$nextTick(() => {
         this.$refs.editBox.focus();
       });
     },
     onEditEnd(parentNote, note) {
+      // 入力フォームを非表示に
       this.isEditing = false;
-
+      // 編集後のnote
       const editedNote = {
         id: note.id,
         name: this.name,
         children: note.children,
       };
-
       this.$emit("edit-end", parentNote, note, editedNote);
     },
     onClickAddChild(note) {
       this.$emit("add-child", note);
+    },
+    onClickAddBrother(parentNote, note) {
+      this.$emit("add-brother", parentNote, note);
     },
   },
 };
@@ -133,6 +143,6 @@ export default {
   }
 }
 .child-note {
-  padding-left: 10px;
+  padding-left: 15px;
 }
 </style>
