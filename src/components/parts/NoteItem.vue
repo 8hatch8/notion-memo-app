@@ -2,28 +2,41 @@
   <div>
     <div
       class="note"
-      :class="{ mouseover: mouseOver }"
+      :class="{ mouseover: mouseOver && !isEditing }"
       @mouseover="onMouseOver"
       @mouseleave="onMouseLeave"
     >
-      <!-- eslint-disable-next-line -->
-      <div class="note-icon"><font-awesome-icon icon="file-alt" /></div>
-      <div class="note-name">{{ note.name }}</div>
-      <!-- 操作メニュー -->
-      <div class="buttons">
-        <div class="button-icon">
-          <font-awesome-icon icon="sitemap" />
+      <!-- name編集フォーム -->
+      <template v-if="isEditing">
+        <input
+          v-model="name"
+          ref="editBox"
+          class="transparent"
+          @keypress.enter="onEditEnd"
+          @blur="onEditEnd"
+        />
+      </template>
+
+      <template v-else>
+        <!-- eslint-disable-next-line -->
+        <div class="note-icon"><font-awesome-icon icon="file-alt" /></div>
+        <div class="note-name">{{ note.name }}</div>
+        <!-- 操作メニュー -->
+        <div class="buttons">
+          <div class="button-icon">
+            <font-awesome-icon icon="sitemap" />
+          </div>
+          <div class="button-icon">
+            <font-awesome-icon icon="plus-circle" />
+          </div>
+          <div class="button-icon">
+            <font-awesome-icon icon="edit" @click="onClickEdit" />
+          </div>
+          <div class="button-icon" @click="onClickDelete(note)">
+            <font-awesome-icon icon="trash" />
+          </div>
         </div>
-        <div class="button-icon">
-          <font-awesome-icon icon="plus-circle" />
-        </div>
-        <div class="button-icon">
-          <font-awesome-icon icon="edit" />
-        </div>
-        <div class="button-icon" @click="onClickDelete(note)">
-          <font-awesome-icon icon="trash" />
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -31,10 +44,12 @@
 export default {
   name: "NoteItem",
   props: ["note"],
-  emits: ["delete"],
+  emits: ["delete", "edit-end"],
   data() {
     return {
+      name: this.note.name, // ToDo:初期値を直接わたしてOKか？確認
       mouseOver: false,
+      isEditing: false,
     };
   },
   methods: {
@@ -46,6 +61,23 @@ export default {
     },
     onClickDelete(note) {
       this.$emit("delete", note);
+    },
+    onClickEdit() {
+      this.isEditing = true;
+
+      this.$nextTick(() => {
+        this.$refs.editBox.focus();
+      });
+    },
+    onEditEnd() {
+      this.isEditing = false;
+      this.$emit("edit-end", this.note, this.editedNote());
+    },
+    editedNote() {
+      return {
+        id: this.note.id,
+        name: this.name,
+      };
     },
   },
 };

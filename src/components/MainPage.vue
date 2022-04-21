@@ -1,8 +1,14 @@
 <template>
   <div class="main-page">
-    <div class="left-menu">
+    <div class="left-menu" @click.self="onEditNoteEnd">
       <!-- ノートリスト -->
-      <NoteItem v-for="note in noteList" :note="note" :key="note.id" @delete="deleteNote" />
+      <NoteItem
+        v-for="note in noteList"
+        :note="note"
+        :key="note.id"
+        @delete="deleteNote"
+        @edit-end="onEditNoteEnd"
+      />
       <!-- ノート追加ボタン -->
       <button class="transparent" @click="addNote">
         <font-awesome-icon icon="plus-square" />ノートを追加
@@ -31,6 +37,12 @@ export default {
     deleteNote(note) {
       const index = this.noteList.indexOf(note);
       this.noteList.splice(index, 1);
+    },
+    onEditNoteEnd(...args) {
+      const [note, editedNote] = args;
+      const index = this.noteList.indexOf(note);
+      // リアクティブに配列を更新
+      this.noteList[index] = Object.assign({}, editedNote);
     },
   },
 };
