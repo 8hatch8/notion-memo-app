@@ -1,50 +1,66 @@
 <template>
   <div>
-    <div
-      class="note"
-      :class="{ mouseover: mouseOver && !isEditing }"
-      @mouseover="onMouseOver"
-      @mouseleave="onMouseLeave"
-    >
-      <!-- name編集フォーム -->
-      <template v-if="isEditing">
-        <input
-          v-model="name"
-          ref="editBox"
-          class="transparent"
-          @keypress.enter="onEditEnd"
-          @blur="onEditEnd"
-        />
-      </template>
+    <div class="note-family">
+      <!-- 親ノート -->
+      <div
+        class="note"
+        :class="{ mouseover: mouseOver && !isEditing }"
+        @mouseover="onMouseOver"
+        @mouseleave="onMouseLeave"
+      >
+        <!-- name編集フォーム -->
+        <template v-if="isEditing">
+          <input
+            v-model="name"
+            ref="editBox"
+            class="transparent"
+            @keypress.enter="onEditEnd(parentNote, note)"
+            @blur="onEditEnd(parentNote, note)"
+          />
+        </template>
 
-      <template v-else>
-        <!-- eslint-disable-next-line -->
-        <div class="note-icon"><font-awesome-icon icon="file-alt" /></div>
-        <div class="note-name">{{ note.name }}</div>
-        <!-- 操作メニュー -->
-        <div class="buttons">
-          <div class="button-icon">
-            <font-awesome-icon icon="sitemap" />
+        <template v-else>
+          <!-- eslint-disable-next-line -->
+          <div class="note-icon"><font-awesome-icon icon="file-alt" /></div>
+          <div class="note-name">{{ name }}</div>
+          <!-- 操作メニュー -->
+          <div class="buttons">
+            <div class="button-icon" @click="onClickAddChild(note)">
+              <font-awesome-icon icon="sitemap" />
+            </div>
+            <div class="button-icon">
+              <font-awesome-icon icon="plus-circle" />
+            </div>
+            <div class="button-icon" @click="onClickEdit">
+              <font-awesome-icon icon="edit" />
+            </div>
+            <div class="button-icon" @click="onClickDelete(parentNote, note)">
+              <font-awesome-icon icon="trash" />
+            </div>
           </div>
-          <div class="button-icon">
-            <font-awesome-icon icon="plus-circle" />
-          </div>
-          <div class="button-icon">
-            <font-awesome-icon icon="edit" @click="onClickEdit" />
-          </div>
-          <div class="button-icon" @click="onClickDelete(note)">
-            <font-awesome-icon icon="trash" />
-          </div>
-        </div>
-      </template>
+        </template>
+      </div>
+
+      <!-- 子ノート -->
+      <div class="child-note">
+        <note-item
+          v-for="childNote in note.children"
+          :note="childNote"
+          :parentNote="note"
+          :key="childNote.id"
+          @delete="onClickDelete"
+          @edit-end="onEditEnd"
+          @add-child="onClickAddChild"
+        />
+      </div>
     </div>
   </div>
 </template>
 <script>
 export default {
   name: "NoteItem",
-  props: ["note"],
-  emits: ["delete", "edit-end"],
+  props: ["note", "key", "parentNote"],
+  emits: ["delete", "edit-end", "add-child"],
   data() {
     return {
       name: this.note.name, // ToDo:初期値を直接わたしてOKか？確認
@@ -53,14 +69,16 @@ export default {
     };
   },
   methods: {
+    // マウスオーバー
     onMouseOver() {
       this.mouseOver = true;
     },
     onMouseLeave() {
       this.mouseOver = false;
     },
-    onClickDelete(note) {
-      this.$emit("delete", note);
+    // 操作メニュー
+    onClickDelete(parentNote, note) {
+      this.$emit("delete", parentNote, note);
     },
     onClickEdit() {
       this.isEditing = true;
@@ -69,15 +87,19 @@ export default {
         this.$refs.editBox.focus();
       });
     },
-    onEditEnd() {
+    onEditEnd(parentNote, note) {
       this.isEditing = false;
-      this.$emit("edit-end", this.note, this.editedNote());
-    },
-    editedNote() {
-      return {
-        id: this.note.id,
+
+      const editedNote = {
+        id: note.id,
         name: this.name,
+        children: note.children,
       };
+
+      this.$emit("edit-end", parentNote, note, editedNote);
+    },
+    onClickAddChild(note) {
+      this.$emit("add-child", note);
     },
   },
 };
@@ -109,5 +131,8 @@ export default {
       border-radius: 5px;
     }
   }
+}
+.child-note {
+  padding-left: 10px;
 }
 </style>

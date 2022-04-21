@@ -6,8 +6,9 @@
         v-for="note in noteList"
         :note="note"
         :key="note.id"
-        @delete="deleteNote"
+        @delete="onDeleteNote"
         @edit-end="onEditNoteEnd"
+        @add-child="onAddChildNote"
       />
       <!-- ノート追加ボタン -->
       <button class="transparent" @click="addNote">
@@ -25,6 +26,7 @@ export default {
   data() {
     return {
       noteList: [],
+      children: [],
     };
   },
   methods: {
@@ -32,17 +34,28 @@ export default {
       this.noteList.push({
         id: new Date().getTime().toString(16),
         name: "新規ノート",
+        children: [],
       });
     },
-    deleteNote(note) {
-      const index = this.noteList.indexOf(note);
-      this.noteList.splice(index, 1);
+    onDeleteNote(parentNote, note) {
+      // 親noteがある場合、childrenの配列を指定
+      const targetNoteList = parentNote == null ? this.noteList : parentNote.children;
+      const index = targetNoteList.indexOf(note);
+      targetNoteList.splice(index, 1);
     },
     onEditNoteEnd(...args) {
-      const [note, editedNote] = args;
-      const index = this.noteList.indexOf(note);
+      const [parentNote, note, editedNote] = args;
+      const targetNoteList = parentNote == null ? this.noteList : parentNote.children;
+      const index = targetNoteList.indexOf(note);
       // リアクティブに配列を更新
-      this.noteList[index] = Object.assign({}, editedNote);
+      targetNoteList[index] = Object.assign({}, editedNote);
+    },
+    onAddChildNote(parentNote) {
+      parentNote.children.push({
+        id: new Date().getTime().toString(16),
+        name: "_新規ノート",
+        children: [],
+      });
     },
   },
 };
