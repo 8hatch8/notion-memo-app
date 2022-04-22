@@ -2,16 +2,19 @@
   <div class="main-page">
     <div class="left-menu">
       <!-- ノートリスト -->
-      <NoteItem
-        v-for="note in noteList"
-        :note="note"
-        :key="note.id"
-        :layer="1"
-        @delete="onDeleteNote"
-        @edit-end="onEditNoteEnd"
-        @add-child="onAddChildNote"
-        @add-brother="onAddBrotherNote"
-      />
+      <draggable v-model="noteList" item-key="id" group="notes" :animation="300" :delay="5">
+        <template #item="{ element }">
+          <NoteItem
+            :note="element"
+            :key="element.id"
+            :layer="1"
+            @delete="onDeleteNote"
+            @edit-name="onEditName"
+            @add-child="onAddChildNote"
+            @add-brother="onAddBrotherNote"
+          />
+        </template>
+      </draggable>
       <!-- ノート追加ボタン -->
       <button class="transparent" @click="onClickAddNote">
         <font-awesome-icon icon="plus-square" />ノートを追加
@@ -23,12 +26,19 @@
 
 <script>
 import NoteItem from "@/components/parts/NoteItem.vue";
+import draggable from "vuedraggable";
 export default {
-  components: { NoteItem },
+  components: { NoteItem, draggable },
   data() {
     return {
-      noteList: [],
-      children: [],
+      noteList: [
+        {
+          id: 0,
+          name: "はじめに",
+          layer: 1,
+          children: [],
+        },
+      ],
     };
   },
   methods: {
@@ -37,7 +47,7 @@ export default {
       layer = layer || 1;
       const note = {
         id: new Date().getTime().toString(16),
-        name: "新規ノート",
+        name: `新規ノート-${layer}-${targetList.length + 1}`,
         children: [],
         layer: layer,
       };
@@ -68,12 +78,13 @@ export default {
       const index = targetNoteList.indexOf(note);
       targetNoteList.splice(index, 1);
     },
-    onEditNoteEnd(...args) {
+    onEditName(...args) {
       const [parentNote, note, editedNote] = args;
       const targetNoteList = parentNote == null ? this.noteList : parentNote.children;
       const index = targetNoteList.indexOf(note);
       // リアクティブに配列を更新
       targetNoteList[index] = Object.assign({}, editedNote);
+      console.log("update");
     },
   },
 };

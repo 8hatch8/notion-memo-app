@@ -13,18 +13,20 @@
           <input
             v-model="name"
             ref="editBox"
-            class="transparent"
-            @keypress.enter="onEditEnd(parentNote, note)"
+            class="transparent pl-1 ml-2"
+            onfocus="this.select()"
+            @keypress.enter="onKeypressEnter"
             @blur="onEditEnd(parentNote, note)"
           />
         </template>
 
         <template v-else>
-          <!-- eslint-disable-next-line -->
-          <div class="note-icon"><font-awesome-icon icon="file-alt" /></div>
+          <div class="note-icon">
+            <font-awesome-icon :icon="mouseOverSwitchIcon" />
+          </div>
           <div class="note-name">{{ name }}</div>
           <!-- 操作メニュー -->
-          <div class="buttons">
+          <div class="buttons" v-if="mouseOver">
             <div class="button-icon" v-if="shouldShowAddChild" @click="onClickAddChild(note)">
               <font-awesome-icon icon="sitemap" />
             </div>
@@ -43,26 +45,32 @@
 
       <!-- 子ノート -->
       <div class="child-note">
-        <note-item
-          v-for="childNote in note.children"
-          :note="childNote"
-          :parentNote="note"
-          :key="childNote.id"
-          :layer="layer + 1"
-          @delete="onClickDelete"
-          @edit-end="onEditEnd"
-          @add-child="onClickAddChild"
-          @add-brother="onClickAddBrother"
-        />
+        <draggable :list="note.children" item-key="id" group="notes" :animation="300" :delay="5">
+          <template #item="{ element }">
+            <note-item
+              :note="element"
+              :parentNote="note"
+              :key="element.id"
+              :layer="layer + 1"
+              @delete="onClickDelete"
+              @edit-name="onEditName"
+              @add-child="onClickAddChild"
+              @add-brother="onClickAddBrother"
+            />
+          </template>
+        </draggable>
       </div>
     </div>
   </div>
 </template>
+
 <script>
+import draggable from "vuedraggable";
 export default {
   name: "NoteItem",
+  components: { draggable },
   props: ["note", "key", "parentNote", "layer"],
-  emits: ["delete", "edit-end", "add-child", "add-brother"],
+  emits: ["delete", "edit-name", "add-child", "add-brother"],
   data() {
     return {
       name: this.note.name,
@@ -74,6 +82,10 @@ export default {
     // layerが3未満ならchildNote追加ボタンを表示
     shouldShowAddChild() {
       return this.layer < 3 ? true : false;
+    },
+    // ドラッグアイコンを表示
+    mouseOverSwitchIcon() {
+      return this.mouseOver ? "bars" : "file-alt";
     },
   },
   methods: {
@@ -94,6 +106,9 @@ export default {
         this.$refs.editBox.focus();
       });
     },
+    onKeypressEnter() {
+      this.$refs.editBox.blur();
+    },
     onEditEnd(parentNote, note) {
       // 入力フォームを非表示に
       this.isEditing = false;
@@ -103,7 +118,11 @@ export default {
         name: this.name,
         children: note.children,
       };
-      this.$emit("edit-end", parentNote, note, editedNote);
+      console.log({ editedNote });
+      this.$emit("edit-name", parentNote, note, editedNote);
+    },
+    onEditName(...args) {
+      this.$emit("edit-name", ...args);
     },
     onClickAddChild(note) {
       this.$emit("add-child", note);
@@ -143,6 +162,6 @@ export default {
   }
 }
 .child-note {
-  padding-left: 15px;
+  padding-left: 30px;
 }
 </style>
