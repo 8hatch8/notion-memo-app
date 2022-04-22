@@ -1,5 +1,6 @@
 <template>
   <div class="main-page">
+    <!-- 左メニュー -->
     <div class="left-menu">
       <!-- ノートリスト -->
       <draggable v-model="noteList" item-key="id" group="notes" :animation="300" :delay="5">
@@ -8,6 +9,8 @@
             :note="element"
             :key="element.id"
             :layer="1"
+            :selectedNote="selectedNote"
+            @select="onSelectNote"
             @delete="onDeleteNote"
             @edit-name="onEditName"
             @add-child="onAddChildNote"
@@ -20,7 +23,20 @@
         <font-awesome-icon icon="plus-square" />ノートを追加
       </button>
     </div>
-    <div class="right-view">右ビュー</div>
+    <!-- 右ビュー -->
+    <div class="right-view">
+      <template v-if="selectedNote == null">
+        <div class="no-selected-note">ノートを選択してください</div>
+      </template>
+      <template v-else>
+        <div class="path">
+          <small>{{ selectedPath }}</small>
+        </div>
+        <div class="note-content">
+          <h3 class="note-title">{{ selectedNote.name }}</h3>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -39,10 +55,35 @@ export default {
           children: [],
         },
       ],
+      selectedNote: null,
     };
   },
+  computed: {
+    selectedPath() {
+      // 検索メソッドの定義
+      const searchSelectedPath = (noteList, path) => {
+        for (let note of noteList) {
+          // 引数pathがあればカレントパスに追加
+          const currentPath = path == null ? note.name : `${path} / ${note.name}`;
+          // 目的のnoteが見つかればカレントパスを返す
+          if (note.id === this.selectedNote.id) return currentPath;
+
+          // 見つからなければchildrenで再帰的に検索
+          const selectedPath = searchSelectedPath(note.children, currentPath);
+          // 見つかれば結果を返す
+          if (selectedPath) return selectedPath;
+        }
+        // 再起的に検索しても見つからない場合
+        return false;
+      };
+      // 実行
+      return searchSelectedPath(this.noteList);
+    },
+  },
   methods: {
-    // TODO左ビューを選ぶとエラーがでる
+    onSelectNote(note) {
+      this.selectedNote = note;
+    },
     addNote(targetList, layer, index) {
       layer = layer || 1;
       const note = {
@@ -84,7 +125,6 @@ export default {
       const index = targetNoteList.indexOf(note);
       // リアクティブに配列を更新
       targetNoteList[index] = Object.assign({}, editedNote);
-      console.log("update");
     },
   },
 };
@@ -101,7 +141,23 @@ export default {
   .right-view {
     flex-grow: 1;
     padding: 10px;
-    background-color: pink;
+    .no-selected-note {
+      text-align: center;
+      font-size: 25px;
+      margin: 20px;
+    }
+    .path {
+      text-align: left;
+      margin-bottom: 50px;
+    }
+    .note-content {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+      .note-title {
+        margin-bottom: 25px;
+      }
+    }
   }
 }
 </style>

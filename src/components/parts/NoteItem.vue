@@ -4,7 +4,8 @@
       <!-- 親ノート -->
       <div
         class="note"
-        :class="{ mouseover: mouseOver && !isEditing }"
+        :class="{ mouseover: mouseOver && !isEditing, selected: isSelectedNote }"
+        @click="onClickNote(note)"
         @mouseover="onMouseOver"
         @mouseleave="onMouseLeave"
       >
@@ -27,16 +28,16 @@
           <div class="note-name">{{ name }}</div>
           <!-- 操作メニュー -->
           <div class="buttons" v-if="mouseOver">
-            <div class="button-icon" v-if="shouldShowAddChild" @click="onClickAddChild(note)">
+            <div class="button-icon" v-if="shouldShowAddChild" @click.stop="onClickAddChild(note)">
               <font-awesome-icon icon="sitemap" />
             </div>
-            <div class="button-icon" @click="onClickAddBrother(parentNote, note)">
+            <div class="button-icon" @click.stop="onClickAddBrother(parentNote, note)">
               <font-awesome-icon icon="plus-circle" />
             </div>
-            <div class="button-icon" @click="onClickEdit">
+            <div class="button-icon" @click.stop="onClickEdit">
               <font-awesome-icon icon="edit" />
             </div>
-            <div class="button-icon" @click="onClickDelete(parentNote, note)">
+            <div class="button-icon" @click.stop="onClickDelete(parentNote, note)">
               <font-awesome-icon icon="trash" />
             </div>
           </div>
@@ -52,6 +53,8 @@
               :parentNote="note"
               :key="element.id"
               :layer="layer + 1"
+              :selectedNote="selectedNote"
+              @select="onClickNote"
               @delete="onClickDelete"
               @edit-name="onEditName"
               @add-child="onClickAddChild"
@@ -69,8 +72,8 @@ import draggable from "vuedraggable";
 export default {
   name: "NoteItem",
   components: { draggable },
-  props: ["note", "key", "parentNote", "layer"],
-  emits: ["delete", "edit-name", "add-child", "add-brother"],
+  props: ["note", "key", "parentNote", "layer", "selectedNote"],
+  emits: ["select", "delete", "edit-name", "add-child", "add-brother"],
   data() {
     return {
       name: this.note.name,
@@ -87,6 +90,9 @@ export default {
     mouseOverSwitchIcon() {
       return this.mouseOver ? "bars" : "file-alt";
     },
+    isSelectedNote() {
+      return this.note === this.selectedNote;
+    },
   },
   methods: {
     // マウスオーバー
@@ -95,6 +101,9 @@ export default {
     },
     onMouseLeave() {
       this.mouseOver = false;
+    },
+    onClickNote(note) {
+      this.$emit("select", note);
     },
     // 操作メニュー
     onClickDelete(parentNote, note) {
@@ -112,13 +121,14 @@ export default {
     onEditEnd(parentNote, note) {
       // 入力フォームを非表示に
       this.isEditing = false;
+      // nameが空白なら元に戻す
+      if (this.name.length === 0) this.name = this.note.name;
       // 編集後のnote
       const editedNote = {
         id: note.id,
         name: this.name,
         children: note.children,
       };
-      console.log({ editedNote });
       this.$emit("edit-name", parentNote, note, editedNote);
     },
     onEditName(...args) {
@@ -143,6 +153,11 @@ export default {
   &.mouseover {
     background-color: rgb(232, 231, 228);
     cursor: pointer;
+  }
+  &.selected {
+    color: black;
+    background-color: rgb(232, 231, 228);
+    font-weight: 600;
   }
   .note-icon {
     margin-left: 10px;
