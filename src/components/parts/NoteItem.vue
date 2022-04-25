@@ -4,7 +4,10 @@
       <!-- 親ノート -->
       <div
         class="note"
-        :class="{ mouseover: mouseOver && !isEditing, selected: isSelectedNote }"
+        :class="{
+          mouseover: mouseOver && !isEditing,
+          selected: isSelectedNote,
+        }"
         @click="onClickNote(note)"
         @mouseover="onMouseOver"
         @mouseleave="onMouseLeave"
@@ -28,15 +31,19 @@
           <div class="note-name">{{ name }}</div>
           <!-- 操作メニュー -->
           <div class="buttons" v-if="mouseOver">
+            <!-- 子ノート追加 -->
             <div class="button-icon" v-if="shouldShowAddChild" @click.stop="onClickAddChild(note)">
               <font-awesome-icon icon="sitemap" />
             </div>
+            <!-- 兄弟ノート追加 -->
             <div class="button-icon" @click.stop="onClickAddBrother(parentNote, note)">
               <font-awesome-icon icon="plus-circle" />
             </div>
+            <!-- name編集 -->
             <div class="button-icon" @click.stop="onClickEdit">
               <font-awesome-icon icon="edit" />
             </div>
+            <!-- ノート削除 -->
             <div class="button-icon" @click.stop="onClickDelete(parentNote, note)">
               <font-awesome-icon icon="trash" />
             </div>
@@ -95,15 +102,15 @@ export default {
     },
   },
   methods: {
+    onClickNote(note) {
+      this.$emit("select", note);
+    },
     // マウスオーバー
     onMouseOver() {
       this.mouseOver = true;
     },
     onMouseLeave() {
       this.mouseOver = false;
-    },
-    onClickNote(note) {
-      this.$emit("select", note);
     },
     // 操作メニュー
     onClickDelete(parentNote, note) {
