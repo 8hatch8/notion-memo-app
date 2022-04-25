@@ -124,26 +124,34 @@ export default {
     },
     // 後ろに新規追加
     onAddBrotherNote(parentNote, childNote) {
-      const targetList = parentNote == null ? this.noteList : parentNote.children;
-      const layer = parentNote == null ? 1 : parentNote.layer;
+      const parentExists = !(parentNote == null);
+
+      const targetList = parentExists ? parentNote.children : this.noteList;
+      const layer = parentExists ? parentNote.layer : 1;
       const index = targetList.indexOf(childNote);
       this.addNote(targetList, layer, index);
     },
     onDeleteNote(parentNote, note) {
       // 親noteがある場合、childrenの配列を指定
-      const targetNoteList = parentNote == null ? this.noteList : parentNote.children;
+      const parentExists = !(parentNote == null);
+
+      const targetNoteList = parentExists ? parentNote.children : this.noteList;
       const index = targetNoteList.indexOf(note);
       targetNoteList.splice(index, 1);
     },
     onEditName(...args) {
       const [parentNote, note, editedNote] = args;
-      const targetNoteList = parentNote == null ? this.noteList : parentNote.children;
+      const parentExists = !(parentNote == null);
+
+      const targetNoteList = parentExists ? parentNote.children : this.noteList;
       const index = targetNoteList.indexOf(note);
-      // リアクティブに配列を更新
-      targetNoteList[index] = Object.assign({}, editedNote);
-      // selectedNoteを更新
+
+      const targetNote = targetNoteList[index];
+      targetNote.name = editedNote.name;
+
+      // 選択中のノートならselectedNoteを更新
       if (this.selectedNote === note) {
-        this.onSelectNote(editedNote);
+        this.onSelectNote(targetNote);
       }
     },
     // 【WIDGET】
@@ -173,16 +181,17 @@ export default {
       this.addWidget(widget.children, widget.layer + 1);
     },
     onAddBrotherWidget(parentWidget, widget) {
-      // parentWidget || this.selectedNote.widgetでいいのでは
-      const targetList =
-        parentWidget == null ? this.selectedNote.widgetList : parentWidget.children;
-      const layer = parentWidget == null ? null : parentWidget.layer + 1;
+      const parentExists = !(parentWidget == null);
+
+      const targetList = parentExists ? parentWidget.children : this.selectedNote.widgetList;
+      const layer = parentExists ? parentWidget.layer + 1 : null;
       const index = targetList.indexOf(widget);
       this.addWidget(targetList, layer, index);
     },
     onDeleteWidget(parentWidget, widget) {
-      const targetList =
-        parentWidget == null ? this.selectedNote.widgetList : parentWidget.children;
+      const parentExists = !(parentWidget == null);
+
+      const targetList = parentExists ? parentWidget.children : this.selectedNote.widgetList;
       const index = targetList.indexOf(widget);
       targetList.splice(index, 1);
     },
