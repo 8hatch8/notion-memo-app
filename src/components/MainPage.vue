@@ -125,6 +125,10 @@ export default {
       const index = targetNoteList.indexOf(note);
       // リアクティブに配列を更新
       targetNoteList[index] = Object.assign({}, editedNote);
+      // selectedNoteを更新
+      if (this.selectedNote === note) {
+        this.onSelectNote(editedNote);
+      }
     },
   },
 };
