@@ -45,6 +45,7 @@
             @delete="onDeleteWidget"
             @add-child="onAddChildWidget"
             @add-brother="onAddBrotherWidget"
+            @change-type="onChangeWidgetType"
           />
           <!-- ウィジェット追加ボタン -->
           <button class="transparent" @click="onClickButtonAddWidget">
@@ -157,6 +158,9 @@ export default {
     // 【WIDGET】
     onInputWidget(text, widget) {
       widget.text = text;
+    },
+    onChangeWidgetType(type, widget) {
+      widget.type = type;
     },
     addWidget(targetList, layer, index) {
       layer = layer || 1;

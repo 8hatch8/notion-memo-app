@@ -7,12 +7,36 @@
       @mouseleave="onMouseLeave"
       :class="{ mouseover: mouseOver }"
     >
-      ・<input
-        :value="widget.text"
-        @input="onInputWidget($event.target.value, widget)"
-        class="transparent"
-        placeholder="本文"
-      />
+      <!-- 見出し -->
+      <template v-if="widget.type === 'heading'">
+        <input
+          :value="widget.text"
+          @input="onInputWidget($event.target.value, widget)"
+          class="heading transparent"
+          placeholder="見出し"
+        />
+      </template>
+      <!-- リスト -->
+      <template v-if="widget.type === 'list'">
+        ・<input
+          :value="widget.text"
+          @input="onInputWidget($event.target.value, widget)"
+          class="list transparent"
+          placeholder="リスト"
+        />
+      </template>
+      <!-- コード -->
+      <template v-if="widget.type === 'code'">
+        <textarea
+          :value="widget.text"
+          @input="onInputWidget($event.target.value, widget)"
+          rows="1"
+          class="code transparent"
+          placeholder="code"
+          :ref="'widget-code-' + widget.id"
+        ></textarea>
+      </template>
+
       <!-- 操作メニュー -->
       <div v-show="mouseOver" class="buttons">
         <!-- 子ウィジェット追加 -->
@@ -28,8 +52,15 @@
           <font-awesome-icon icon="trash" />
         </div>
         <!-- コンフィグ -->
-        <div class="button-icon" @click.stop="">
-          <font-awesome-icon icon="cog" />
+        <div class="button-icon">
+          <font-awesome-icon icon="cog" data-toggle="dropdown" />
+          <div class="dropdown-menu">
+            <a class="dropdown-item" @click.stop="onClickWidgetType('heading', widget)">見出し</a>
+            <a class="dropdown-item" @click.stop="onClickWidgetType('list', widget)">リスト</a>
+            <a class="dropdown-item" @click.stop="onClickWidgetType('code', widget)"
+              >ソースコード</a
+            >
+          </div>
         </div>
       </div>
     </div>
@@ -46,6 +77,7 @@
         @delete="onClickDelete"
         @add-child="onClickAddChild"
         @add-brother="onClickAddBrother"
+        @change-type="onClickWidgetType"
       />
     </div>
   </div>
@@ -55,15 +87,20 @@
 export default {
   name: "WidgetItem",
   props: ["widget", "parentWidget", "layer"],
-  emits: ["input", "addChild", "addBrother", "delete"],
+  emits: ["input", "add-child", "add-brother", "delete", "change-type"],
   data() {
     return {
       mouseOver: false,
     };
   },
   methods: {
+    // テキスト入力
     onInputWidget(text, widget) {
       this.$emit("input", text, widget);
+    },
+    // ウィジェットタイプ変更
+    onClickWidgetType(type, widget) {
+      this.$emit("change-type", type, widget);
     },
     // マウスオーバー
     onMouseOver() {
@@ -74,13 +111,32 @@ export default {
     },
     // 操作メニュー
     onClickAddChild(widget) {
-      this.$emit("addChild", widget);
+      this.$emit("add-child", widget);
     },
     onClickAddBrother(parentWidget, widget) {
-      this.$emit("addBrother", parentWidget, widget);
+      this.$emit("add-brother", parentWidget, widget);
     },
     onClickDelete(parentWidget, widget) {
       this.$emit("delete", parentWidget, widget);
+    },
+    // コードタイプのリサイズ
+    resizeCodeTextarea() {
+      if (this.widget.type !== "code") return;
+      const textarea = this.$refs[`widget-code-${this.widget.id}`];
+      const promise = new Promise((resolve) => {
+        resolve((textarea.style.height = "auto"));
+      });
+      promise.then(() => {
+        textarea.style.height = textarea.scrollHeight + "px";
+      });
+    },
+  },
+  mounted() {
+    this.resizeCodeTextarea();
+  },
+  watch: {
+    "widget.text"() {
+      this.resizeCodeTextarea();
     },
   },
 };
@@ -103,6 +159,31 @@ export default {
       margin-left: 3px;
       border-radius: 5px;
     }
+  }
+  input.heading {
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 1.5px solid #e0e0e0;
+  }
+  input.list {
+    font-size: 16px;
+  }
+  .code {
+    width: calc(100% - 120px);
+    height: 35px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 8px;
+    color: #f8f8f2;
+    background: #282a36;
+    font-size: 14px;
+    font-family: Consolas, Menlo, "Liberation Mono", Courier, monospace;
+    resize: none;
+  }
+  .code:focus {
+    outline: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
   }
 }
 .child-widget {
