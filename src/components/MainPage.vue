@@ -128,7 +128,6 @@ export default {
       } else {
         targetList.splice(index + 1, 0, note);
       }
-
       // 追加したノートを選択
       this.onSelectNote(note);
     },
