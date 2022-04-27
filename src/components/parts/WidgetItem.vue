@@ -14,6 +14,10 @@
           @input="onInputWidget($event.target.value, widget)"
           class="heading transparent"
           placeholder="見出し"
+          :ref="'widget-heading-' + widget.id"
+          @keypress.enter="onClickAddBrother(parentWidget, widget)"
+          @keydown.tab="onKeyDownTab"
+          @keydown.delete="onKeyDownDelete"
         />
       </template>
       <!-- リスト -->
@@ -23,6 +27,10 @@
           @input="onInputWidget($event.target.value, widget)"
           class="list transparent"
           placeholder="リスト"
+          :ref="'widget-list-' + widget.id"
+          @keypress.enter="onClickAddBrother(parentWidget, widget)"
+          @keydown.tab="onKeyDownTab"
+          @keydown.delete="onKeyDownDelete"
         />
       </template>
       <!-- コード -->
@@ -34,6 +42,7 @@
           class="code transparent"
           placeholder="code"
           :ref="'widget-code-' + widget.id"
+          @keydown.delete="onKeyDownDelete"
         ></textarea>
       </template>
 
@@ -67,25 +76,36 @@
 
     <!-- 子ウィジェット -->
     <div class="child-widget">
-      <WidgetItem
-        v-for="childWidget in widget.children"
-        :key="childWidget.id"
-        :widget="childWidget"
-        :parentWidget="widget"
-        :layer="layer + 1"
-        @input="onInputWidget"
-        @delete="onClickDelete"
-        @add-child="onClickAddChild"
-        @add-brother="onClickAddBrother"
-        @change-type="onClickWidgetType"
-      />
+      <draggable
+        v-bind:list="widget.children"
+        item-key="id"
+        :animation="300"
+        :delay="0"
+        group="widgets"
+      >
+        <template #item="{ element }">
+          <WidgetItem
+            :key="element.id"
+            :widget="element"
+            :parentWidget="widget"
+            :layer="layer + 1"
+            @input="onInputWidget"
+            @delete="onClickDelete"
+            @add-child="onClickAddChild"
+            @add-brother="onClickAddBrother"
+            @change-type="onClickWidgetType"
+          />
+        </template>
+      </draggable>
     </div>
   </div>
 </template>
 
 <script>
+import draggable from "vuedraggable";
 export default {
   name: "WidgetItem",
+  components: { draggable },
   props: ["widget", "parentWidget", "layer"],
   emits: ["input", "add-child", "add-brother", "delete", "change-type"],
   data() {
@@ -97,6 +117,18 @@ export default {
     // テキスト入力
     onInputWidget(text, widget) {
       this.$emit("input", text, widget);
+    },
+    onKeyDownTab(event) {
+      if (this.widget.layer < 3) {
+        this.$emit("add-child", this.widget);
+        event.preventDefault();
+      }
+    },
+    onKeyDownDelete(event) {
+      if (this.widget.text.length === 0) {
+        this.$emit("delete", this.parentWidget, this.widget);
+        event.preventDefault();
+      }
     },
     // ウィジェットタイプ変更
     onClickWidgetType(type, widget) {
@@ -130,13 +162,24 @@ export default {
         textarea.style.height = textarea.scrollHeight + "px";
       });
     },
+    // 生成時にフォーカスをあてる
+    focusWidget() {
+      this.$nextTick(() => {
+        const input = this.$refs[`widget-${this.widget.type}-${this.widget.id}`];
+        input.focus();
+      });
+    },
   },
   mounted() {
     this.resizeCodeTextarea();
+    this.focusWidget();
   },
   watch: {
     "widget.text"() {
       this.resizeCodeTextarea();
+    },
+    "widget.type"() {
+      this.focusWidget();
     },
   },
 };

@@ -36,17 +36,26 @@
         <!-- コンテンツ -->
         <div class="note-content">
           <h3 class="note-title">{{ selectedNote.name }}</h3>
-          <WidgetItem
-            v-for="widget in selectedNote.widgetList"
-            :key="widget.id"
-            :widget="widget"
-            :layer="1"
-            @input="onInputWidget"
-            @delete="onDeleteWidget"
-            @add-child="onAddChildWidget"
-            @add-brother="onAddBrotherWidget"
-            @change-type="onChangeWidgetType"
-          />
+          <draggable
+            v-model="selectedNote.widgetList"
+            item-key="id"
+            :animation="300"
+            :delay="0"
+            group="widgets"
+          >
+            <template #item="{ element }">
+              <WidgetItem
+                :key="element.id"
+                :widget="element"
+                :layer="1"
+                @input="onInputWidget"
+                @delete="onDeleteWidget"
+                @add-child="onAddChildWidget"
+                @add-brother="onAddBrotherWidget"
+                @change-type="onChangeWidgetType"
+              />
+            </template>
+          </draggable>
           <!-- ウィジェット追加ボタン -->
           <button class="transparent" @click="onClickButtonAddWidget">
             <font-awesome-icon icon="plus-square" />
@@ -114,6 +123,9 @@ export default {
       } else {
         targetList.splice(index + 1, 0, note);
       }
+
+      // 追加したノートを選択
+      this.onSelectNote(note);
     },
     // 新規追加
     onClickAddNote() {
@@ -166,7 +178,7 @@ export default {
       layer = layer || 1;
       const widget = {
         id: new Date().getTime().toString(16),
-        type: "heading",
+        type: layer === 1 ? "heading" : "list",
         text: "",
         children: [],
         layer: layer,
@@ -198,6 +210,13 @@ export default {
       const targetList = parentExists ? parentWidget.children : this.selectedNote.widgetList;
       const index = targetList.indexOf(widget);
       targetList.splice(index, 1);
+
+      // 削除した場合、1つ前のウィジェットを選択状態にする
+      const focusWidget = index === 0 ? parentWidget : targetList[index - 1];
+      if (focusWidget != null) {
+        // IDを作り直すことで、mounted関数でfocusWidget関数を呼び出す
+        focusWidget.id = (parseInt(focusWidget.id, 16) + 1).toString(16);
+      }
     },
   },
 };
