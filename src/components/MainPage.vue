@@ -156,6 +156,9 @@ export default {
       const targetNoteList = parentExists ? parentNote.children : this.noteList;
       const index = targetNoteList.indexOf(note);
       targetNoteList.splice(index, 1);
+
+      // 削除したノートが選択中なら、選択を解除
+      if (this.selectedNote === note) this.selectedNote = null;
     },
     onEditName(...args) {
       const [parentNote, note, editedNote] = args;
