@@ -257,10 +257,12 @@ export default {
   .left-menu {
     width: 350px;
     background-color: #f7f6f3;
+    overflow: auto;
   }
   .right-view {
     flex-grow: 1;
     padding: 10px;
+    overflow: auto;
     .no-selected-note {
       text-align: center;
       font-size: 25px;

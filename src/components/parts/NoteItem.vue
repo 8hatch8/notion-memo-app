@@ -152,6 +152,7 @@ export default {
 </script>
 <style lang="scss">
 .note {
+  min-width: 280px;
   margin: 10px 0;
   display: flex;
   align-items: center;
