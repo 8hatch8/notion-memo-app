@@ -2,6 +2,11 @@
   <div class="main-page">
     <!-- 左メニュー -->
     <div class="left-menu">
+      <!-- 保存ボタン -->
+      <button class="transparent" @click="onClickButtonSave">
+        <font-awesome-icon icon="save" /> 保存
+      </button>
+
       <!-- ノートリスト -->
       <draggable v-model="noteList" item-key="id" group="notes" :animation="300" :delay="5">
         <template #item="{ element }">
@@ -218,6 +223,27 @@ export default {
         focusWidget.id = (parseInt(focusWidget.id, 16) + 1).toString(16);
       }
     },
+    // ローカルストレージ
+    loadDataFromLocalStorage() {
+      const localData = localStorage.getItem("noteItem");
+      if (localData != null) {
+        this.noteList = JSON.parse(localData);
+      }
+    },
+    onClickButtonSave() {
+      this.saveDataToLocalStorage();
+    },
+    saveDataToLocalStorage() {
+      localStorage.setItem("noteItem", JSON.stringify(this.noteList));
+      this.$toast.show("保存しました", {
+        type: "success",
+        position: "top-left",
+        duration: 1000,
+      });
+    },
+  },
+  created() {
+    this.loadDataFromLocalStorage();
   },
 };
 </script>
